@@ -40,7 +40,7 @@ def index_product_info(product_dict):
     ix = st.create_index(schema)
     writer = ix.writer()
     for key in product_dict.keys():
-        writer.add_document(path=unicode(key, "utf-8"), content=unicode(product_dict[key], "utf-8"))
+        writer.add_document(path=key, content=product_dict[key])
     writer.commit(mergetype=writing.CLEAR)
     return ix
 
@@ -101,7 +101,7 @@ def get_best_match(matches):
 
 def safe_get(row, column):
     value = row.get(column)
-    if isinstance(value, basestring):
+    if isinstance(value, str):
         return value
     return ''
 
@@ -144,19 +144,19 @@ if __name__ == "__main__":
         overwrite_category = settings.get("overwrite_category", False)
 
     # load taxonomy
-    print "Loading taxonomy. Base categories: %s ..." % ", ".join(args.base_category)
+    print("Loading taxonomy. Base categories: %s ..." % ", ".join(args.base_category))
     categories = load_taxonomy(args.base_category, taxonomy_file=taxonomy_file, taxonomy_url=taxonomy_url,
                                fetch_online=fetch_online)
     if not categories:
-        print "Error: base category %s not found in taxonomy" % args.base_category
+        print("Error: base category %s not found in taxonomy" % args.base_category)
 
     if not args.base_category:
-        print "Warning: you did not specify a base category. This can take *very* long time to complete. See matcher -h for help."
+        print("Warning: you did not specify a base category. This can take *very* long time to complete. See matcher -h for help.")
 
     # load product csv file
-    print "Parsing input file: %s" % product_file
-    product_data = pd.read_csv(product_file, sep='\t', usecols=product_columns + [google_category_column])
-    print "Processing %d rows ..." % product_data.shape[0]
+    print("Parsing input file: %s" % product_file)
+    product_data = pd.read_csv(product_file, sep=',', usecols=product_columns + [google_category_column])
+    print("Processing %d rows ..." % product_data.shape[0])
 
     # if target google category column doesnt exist in file: add
     if not google_category_column in product_data.columns:
@@ -168,7 +168,7 @@ if __name__ == "__main__":
     for row_index, row in product_data.iterrows():
         index += 1
         if index % 10 == 0:
-            print "Progress: %d rows finished" % index
+            print("Progress: %d rows finished" % index)
         p = {}
         for col in product_columns:
             value = safe_get(row, col)
@@ -210,8 +210,5 @@ if __name__ == "__main__":
     original_data = pd.read_csv(product_file, sep='\t')
     original_data[google_category_column] = gcat_col
     original_data.to_csv(output_product_file, sep='\t', index=False)
-    print "processed %d rows of '%s', replaced %d,  output written to '%s'" % (
-        (index - 1), product_file, replacements, output_product_file)
-
-
-
+    print( "processed %d rows of '%s', replaced %d,  output written to '%s'" % (
+        (index - 1), product_file, replacements, output_product_file))
